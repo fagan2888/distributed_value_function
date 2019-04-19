@@ -4,7 +4,7 @@ Defines the main training loop. Now it's just take random action
 
 import numpy as np
 
-from agent import RandomAgent
+from agent import RandomAgent, QLearningAgent
 from env import make_type_c_grid
 
 
@@ -34,16 +34,15 @@ def q_learn(env, agent):
         # get an action using epilon-greedy
         action = epsilon_greedy(env.action_space.sample(), agent.predict(obs), epsilon)
         next_obs, reward, done, _ = env.step(action)
-        agent.learn(obs, next_obs, reward)  # update q table using obs, next_obs, reward
+        agent.learn(obs, next_obs, action, reward)  # update q table using obs, next_obs, reward
         if done:
             obs = env.reset()
         else:
             obs = next_obs
 
 
-if __name__ == '__main__':
+def test(env, agent):
     env = make_type_c_grid()
-    agent = RandomAgent(env.action_space)
     done = False
     obs = env.reset()
     reward_lst = []
@@ -54,3 +53,11 @@ if __name__ == '__main__':
 
     print('Total reward {}'.format(np.sum(reward_lst)))
     print(reward_lst)
+
+
+if __name__ == '__main__':
+    env = make_type_c_grid()
+    agent = QLearningAgent()
+    q_learn(env, agent)
+
+
