@@ -28,7 +28,7 @@ class QLearningAgent(BaseAgent):
         # Action Space (local): double, stay the same, or half
         self.action_space = 3
         # Distributor-distributor state space: 18, from paper. TODO
-        self.obs_space = 18
+        self.obs_space = 54
 
         # initialize Q table with 0
         # What should I set Initial conditions (Q0)?
