@@ -144,8 +144,7 @@ class LineGrid(gym.Env):
         voltages = self.previous_voltage
         requirement_state = np.logical_and(voltages[1:] > self.voltage_range[:, 0],
                                            voltages[1:] < self.voltage_range[:, 1]).astype(np.int)
-        number_not_meet_requirement = self.num_resistance - np.sum(requirement_state)
-        return -number_not_meet_requirement
+        return requirement_state
 
     def _encode_action(self, raw_action):
         """ Encode the raw action into action space that can directly compute the next state

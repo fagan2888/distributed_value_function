@@ -4,7 +4,7 @@ Defines the main training loop. Now it's just take random action
 
 import numpy as np
 
-from agent import RandomAgent, QLearningAgent
+from agent import DistributedQLearningAgent
 from env import make_type_c_grid
 
 
@@ -57,7 +57,5 @@ def test(env, agent):
 
 if __name__ == '__main__':
     env = make_type_c_grid()
-    agent = QLearningAgent()
+    agent = DistributedQLearningAgent()
     q_learn(env, agent)
-
-
