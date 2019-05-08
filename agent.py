@@ -79,7 +79,7 @@ class QLearningAgent(BaseAgent):
         #         maxFutureQ = self.QTable[next_obs][action]
 
         self.QTable[obs][action] = (1 - self.learningRate) * self.QTable[obs][action] + self.learningRate * (
-                    reward + self.discountFactor * maxFutureQ)
+                reward + self.discountFactor * maxFutureQ)
 
 
 class DistributedQLearningAgent(BaseAgent):
@@ -94,7 +94,7 @@ class DistributedQLearningAgent(BaseAgent):
         """
 
         Args:
-            obs: (54, num_local_agents)
+            obs: np array of shape (10,)
 
         Returns:
 
@@ -122,7 +122,3 @@ class DistributedQLearningAgent(BaseAgent):
         neighbor_maQ = ...
         for i, local_agent in enumerate(self.local_agents):
             local_agent.learn(obs[i], next_obs[i], action[i], reward[i], neighbor_maQ[i])
-
-
-
-
