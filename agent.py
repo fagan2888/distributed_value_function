@@ -26,28 +26,28 @@ class QLearningAgent(BaseAgent):
         Initialize data structures for Q leaner. You may need to change the constructor to pass more arguments.
         """
         # Action Space (local): double, stay the same, or half
-        self.action_space = 3
-        # Distributor-distributor state space: 18, from paper. TODO
-        self.obs_space = 54
+        self.action_count = 3
+        # Distributor-distributor state space: 54
+        self.obs_count = 54
 
         # initialize Q table with 0
         # What should I set Initial conditions (Q0)?
         # self.QTable = [[0 for i in range(state_space)] for j in range(action_space)]
-        self.QTable = np.zeros(shape=(self.obs_space, self.action_space))
+        self.QTable = np.zeros(shape=(self.obs_count, self.action_count))
         self.learningRate = 0.2
         self.discountFactor = 0.99
 
     def predict(self, obs):
-        maxQ = 0
-        maxAction = -1
-        for action in self.action_space:
-            if maxQ < self.QTable[obs][action]:
-                maxQ = self.QTable[obs][action]
-                maxAction = action
+        """ Get the max Q value given obs. Use np.argmax
 
-        # use np.argmax
+                Args:
+                    obs: integer
 
-        return maxAction
+                Returns: max Q value's index (which is the action to take).
+
+        """
+        rowInQ = self.QTable[obs]
+        return np.argmax(rowInQ)
 
     def getMaxQ(self, obs):
         """ Get the max Q value given obs. Use np.max
@@ -58,7 +58,8 @@ class QLearningAgent(BaseAgent):
         Returns: max Q value
 
         """
-        pass
+        rowInQ = self.QTable[obs]
+        return np.max(rowInQ)
 
     def learn(self, obs, next_obs, action, reward, maxFutureQ):
         """
@@ -73,13 +74,8 @@ class QLearningAgent(BaseAgent):
         Returns:
 
         """
-        # maxFutureQ = 0
-        # for action in self.action_space:
-        #     if maxFutureQ < self.QTable[next_obs][action]:
-        #         maxFutureQ = self.QTable[next_obs][action]
-
-        self.QTable[obs][action] = (1 - self.learningRate) * self.QTable[obs][action] + self.learningRate * (
-                reward + self.discountFactor * maxFutureQ)
+        self.QTable[obs][action] = (1 - self.learningRate) * self.QTable[obs][action] + \
+                                   self.learningRate * (reward + self.discountFactor * maxFutureQ)
 
 
 class DistributedQLearningAgent(BaseAgent):
@@ -103,7 +99,7 @@ class DistributedQLearningAgent(BaseAgent):
         action = []
         for i, agent in enumerate(self.local_agents):
             action.append(agent.predict(obs[:, i]))
-        action = np.array(action)
+        action = np.ndarray(action)
         return action
 
     def learn(self, obs, next_obs, action, reward) -> None:
@@ -119,6 +115,18 @@ class DistributedQLearningAgent(BaseAgent):
         Returns: None
 
         """
-        neighbor_maQ = ...
+        # Gather each agent's max Q given observation
+        agent_maxQ = []
+        for i, agent in enumerate(self.local_agents):
+            agent_maxQ.append(self.local_agents.getMaxQ(self, obs[i]))
+
+        # Compute each agent's neighboring max Q
+        neighbor_maxQ = []
+        neighbor_maxQ.append((agent_maxQ[0] + agent_maxQ[1]) / 2)
+        for i in range(1, self.local_agents.count() - 1):
+            neighbor_maxQ.append((agent_maxQ[i-1] + agent_maxQ[i] + agent_maxQ[i+1]) / 3)
+        neighbor_maxQ.append((agent_maxQ[self.local_agents.count() - 2] + agent_maxQ[self.local_agents.count() - 1]) / 2)
+
+        # Call each agent's learn function
         for i, local_agent in enumerate(self.local_agents):
-            local_agent.learn(obs[i], next_obs[i], action[i], reward[i], neighbor_maQ[i])
+            local_agent.learn(obs[i], next_obs[i], action[i], reward[i], neighbor_maxQ[i])
